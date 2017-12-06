@@ -7,6 +7,7 @@ defmodule AdventOfCode2017.Day05Test do
 
     import AdventOfCode2017.Day05
 
+    @tag :skip # Takes too long
     test "Part 1 works" do
         assert with_puzzle_input("test/input/day05.txt", fn input ->
             assert 394829 == input |> part1
