@@ -1,16 +1,22 @@
 defmodule AdventOfCode2017.Day06 do
-    # @doc """
-    #     iex> AdventOfCode2017.Day06.part1("0\t2\t7\t0")
-    #     5
-    # """
+    @doc """
+        iex> AdventOfCode2017.Day06.part1("0\t2\t7\t0")
+        5
+    """
     def part1(input) do
         input
         |> parse_input
         |> count_to_dupe
     end
 
-    def parse_input(input) do
+    def part2(input) do
         input
+        |> parse_input
+        |> gen_history
+    end
+
+    def parse_input(input) do
+        banks = input
         |> String.trim
         |> String.split("\t")
         |> Enum.map(&String.to_integer/1)
@@ -19,21 +25,37 @@ defmodule AdventOfCode2017.Day06 do
             |> Map.put(:count, acc.count + 1)
         end)
         |> Map.delete(:count)
+
+        {banks, Enum.count(banks)}
     end
 
-    def count_to_dupe(state) do
-        count_to_dupe(state, [], Enum.count(state), 1)
-    end
-    def count_to_dupe(state, history, state_size, count) do
+    def next_state(state, state_size) do
         max_pos = find_max(state)
         block_size = state[max_pos]
 
         new_state = Map.put(state, max_pos, 0)
         |> redistribute(next_pos(max_pos, state_size) , state_size, block_size)
         
+        new_state
+    end
+
+    def count_to_dupe({state, state_size}, history \\ MapSet.new, count \\ 1) do
+        new_state = next_state(state, state_size)
+
         cond do
-            contains(history, new_state) -> count
-            true -> count_to_dupe(new_state, [new_state | history], state_size, count + 1)
+            MapSet.member?(history, new_state) -> count
+            true -> count_to_dupe({new_state, state_size}, [new_state | history], count + 1)
+        end
+    end
+
+    def gen_history({state, state_size}, history \\ %{}, count \\ 1) do
+        new_state = next_state(state, state_size)
+
+        cond do
+            new_count = history[new_state] -> count - new_count + 1
+            true ->
+                new_count = count + 1
+                gen_history({new_state, state_size}, Map.put(history, new_state, new_count), new_count)
         end
     end
 
