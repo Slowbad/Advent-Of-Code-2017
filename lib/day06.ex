@@ -44,7 +44,7 @@ defmodule AdventOfCode2017.Day06 do
 
         cond do
             MapSet.member?(history, new_state) -> count
-            true -> count_to_dupe({new_state, state_size}, [new_state | history], count + 1)
+            true -> count_to_dupe({new_state, state_size}, MapSet.put(history, new_state), count + 1)
         end
     end
 
