@@ -11,7 +11,10 @@ defmodule Day08 do
     end
 
     def part2(input) do
-
+        input
+        |> parse_input
+        |> run
+        |> elem(0)
     end
 
     def parse_input(input) do
@@ -34,11 +37,13 @@ defmodule Day08 do
     end
 
     def run(instructions) do
-        Enum.reduce(instructions, %{}, fn(instruction, registers) ->
+        Enum.reduce(instructions, {0, %{}}, fn(instruction, {highest, registers}) ->
             if valid_condition?(instruction, registers) do
-                perform_operation(instruction, registers)
+                {value, registers} = perform_operation(instruction, registers)
+                highest = if value > highest, do: value, else: highest
+                {highest, registers}
             else
-                registers
+                {highest, registers}
             end
         end)
     end
@@ -57,14 +62,15 @@ defmodule Day08 do
     end
 
     def perform_operation({register, operand, operator, _, _, _}, registers) do
-        value = Map.get(registers, register, 0)
-        Map.put(registers, register, maths(operand, value, operator))
+        value = maths(operand, Map.get(registers, register, 0), operator)
+        registers = Map.put(registers, register, value)
+        {value, registers}
     end
 
     def maths(:inc, a, b), do: a + b
     def maths(:dec, a, b), do: a - b
 
-    def find_largest_register(registers) do
+    def find_largest_register({_, registers}) do
         registers
         |> Map.values
         |> Enum.max
