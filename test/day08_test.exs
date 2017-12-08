@@ -7,7 +7,7 @@ defmodule AdventOfCode2018.Day08Test do
     # @tag :skip
     test "Part 1 works" do
         assert with_puzzle_input("test/input/day08.txt", fn input ->
-            assert 6064 == input |> part1
+            assert 5221 == input |> part1
         end)
     end
 
