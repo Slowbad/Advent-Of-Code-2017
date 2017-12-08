@@ -6,6 +6,17 @@ defmodule Day07 do
         |> find_root
     end
 
+    def part2(input) do
+        nodes = input
+        |> parse_input
+
+        nodes
+        |> build_tree(find_root(nodes))
+        |> weigh_tree
+        |> find_unbalanced_node
+        |> correction
+    end
+
     @doc """
         iex> Day07.parse_input("abcd (55)\\nefghi (3) -> abcd, zxcv")
         %{"abcd" => {55, []}, "efghi" => {3, ["abcd", "zxcv"]}}
@@ -28,7 +39,7 @@ defmodule Day07 do
         |> Enum.into(%{})
     end
 
-    def parse_children(children) when byte_size(children) == 0, do: []
+    def parse_children(""), do: []
     def parse_children(children), do: children |> String.split(", ")
 
     @doc """
@@ -45,24 +56,46 @@ defmodule Day07 do
         end
     end
 
-    @doc """
-        iex> Day07.weigh_node("abcd", %{"abcd" => {55, ["efgh"]}, "efgh" => {3, []}})
-        58
-    """
-    def weigh_node(name, nodes) do
-        get_children(name, nodes)
-        |> Enum.map(&weigh_node(&1, nodes))
-        |> Enum.sum 
-        |> Kernel.+(nodes[name] |> elem(0))
+    def build_tree(nodes, name) do
+        {weight, children} = nodes[name]
+        {name, weight, Enum.map(children, &build_tree(nodes, &1))}
     end
 
-    def get_children(name, nodes), do: nodes[name] |> elem(1)
+    def weigh_tree({name, weight, children}) do
+        children_with_total_weight = Enum.map(children, &weigh_tree/1)
 
-    @doc """
-        iex> Day07.find_unbalanced_node(%{"abcd" => {55, ["efgh", "zxcv"]}, "efgh" => {3, []}, "zxcv" => {4, []}})
-        "efgh"
-    """
-    def find_unbalanced_node(nodes) do
+        total_weight = 
+            Enum.reduce(children_with_total_weight, weight, fn({_, _, child_total_weight, _}, sum) ->
+                sum + child_total_weight
+            end)
+        
+        {name, weight, total_weight, children_with_total_weight}
+    end
 
+    def find_unbalanced_node({name, weight, total_weight, children}, balanced \\ []) do
+        groups = Enum.group_by(children, &elem(&1, 2))
+
+        case map_size(groups) do
+            1 ->
+                [{_, _, correct_weight, _} | _] = balanced
+                {name, weight, total_weight, correct_weight}
+
+            2 ->
+                {unbalanced, balanced} = extract_unbalanced_and_balanced(groups)
+                find_unbalanced_node(unbalanced, balanced)
+        end
+    end
+
+    def extract_unbalanced_and_balanced(groups) do
+        Enum.reduce(groups, {nil, nil}, fn({_, list}, {unbalanced, balanced}) ->
+            case length(list) do
+                1 -> {hd(list), balanced}
+                _ -> {unbalanced, list}
+            end
+        end)
+    end
+
+    def correction({_, my_weight, wrong_weight, correct_weight}) do
+        my_weight + correct_weight - wrong_weight
     end
 end
