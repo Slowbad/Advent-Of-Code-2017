@@ -1,4 +1,4 @@
-defmodule AdventOfCode2018.Day08Test do
+defmodule AdventOfCode2017.Day08Test do
     use AdventOfCode2017.SupportCase
     doctest Day08
 
