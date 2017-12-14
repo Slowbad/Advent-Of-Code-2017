@@ -1,5 +1,5 @@
 defmodule Day10 do
-    def part1(input, data_size) do
+    def part1(input) do
         input
         |> String.trim
         |> String.split(",")
@@ -9,8 +9,25 @@ defmodule Day10 do
         |> (fn [first, second | _] -> first * second end).()
     end
 
-    def part2(_input) do
+    def part2(input) do
+        sequence = input
+        |> String.to_charlist
+        |> Enum.concat([17, 31, 73, 47, 23])
 
+        Enum.reduce(1..64, {Enum.to_list(0..255), 0, 0}, fn 
+            (_n, {data, position, skip_size}) -> hash(sequence, data, position, skip_size)
+        end)
+        |> elem(0)
+        |> Enum.chunk(16)
+        |> Enum.map(fn ([first | rest]) ->
+            use Bitwise, only_operators: true
+            Enum.reduce(rest, first, fn(a, acc) -> a ^^^ acc end)
+        end)
+        |> Enum.map_join(fn (number) ->
+            Integer.to_string(number, 16)
+            |> String.pad_leading(2, "0")
+        end)
+        |> String.downcase
     end
 
     @doc """
