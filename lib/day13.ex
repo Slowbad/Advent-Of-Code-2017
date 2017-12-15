@@ -1,12 +1,4 @@
 defmodule Day13 do
-    defmodule Scanner do
-        defstruct [
-            depth: 0,
-            range: 0,
-            position: 0,
-            direction: :up
-        ]
-    end
 
     def part1(input) do
         input
@@ -15,24 +7,22 @@ defmodule Day13 do
     end
 
     @doc """
-        iex> Day13.run([%Day13.Scanner{range: 2}])
+        iex> Day13.run([{0, 2}])
         0
 
-        iex> Day13.run([%Day13.Scanner{range: 2}, nil, %Day13.Scanner{depth: 2, range: 2}])
+        iex> Day13.run([{0, 2}, {2, 2}])
         4
-    """
-    def run([_scanner | remaining]), do: run(remaining, 0)
-    def run([], severity), do: severity
-    def run([scanner | remaining], severity) when is_nil(scanner), do: run(remaining, severity)
-    def run([scanner | remaining], severity) do
-        scanner = Enum.reduce(1..scanner.depth, scanner, fn(_, scn) -> step(scn) end)
-        severity =
-            case scanner.position do
-                0 -> severity + scanner.depth * scanner.range
-                _ -> severity
-            end
 
-        run(remaining, severity)
+        iex> Day13.run([{0, 2}, {1, 2}, {4, 4}, {6, 4}])
+        24
+
+        # iex> Day13.run([{0, 2}, {1, 2}, {4, 4}, {6, 4}], 4)
+        # 2
+    """
+    def run(firewall, time_delay \\ 0) do
+        firewall
+        |> Enum.filter(fn({depth, range}) -> rem(depth + time_delay, range * 2 - 2) == 0 end)
+        |> Enum.reduce(0, fn({depth, range}, acc) -> acc + depth * range end)
     end
     
     def parse_input(input) do
@@ -45,29 +35,24 @@ defmodule Day13 do
             |> Enum.map(&String.to_integer/1)
             {depth, range}
         end)
-        |> Enum.into(%{})
-        |> to_firewall
     end
 
-    def to_firewall(input) do
-        firewall_depth = input |> Map.keys |> Enum.max
-        Enum.reduce(0..firewall_depth, [], fn(n, acc) ->
-            result =
-                case input[n] do
-                    nil -> nil
-                    range -> %Scanner{depth: n, range: range}
-                end
-            [result | acc]
+    # def step(%Scanner{range: range, position: position, direction: :up} = scanner) when position == range - 1, do: struct(scanner, position: position - 1, direction: :down)
+    # def step(%Scanner{position: position, direction: :down} = scanner) when position == 0, do: struct(scanner, position: position + 1, direction: :up)
+    # def step(%Scanner{position: position, direction: :up} = scanner), do: struct(scanner, position: position + 1)
+    # def step(%Scanner{position: position, direction: :down} = scanner), do: struct(scanner, position: position - 1)
+
+    def part2(input) do
+        firewall = input
+        |> parse_input
+
+        {firewall, -1, -1}
+        |> Stream.iterate(fn({firewall, time_delay, _}) ->
+            time_delay = time_delay + 1
+            {firewall, time_delay, run(firewall, time_delay)}
         end)
-        |> Enum.reverse
-    end
-
-    def step(%Scanner{range: range, position: position, direction: :up} = scanner) when position == range - 1, do: struct(scanner, position: position - 1, direction: :down)
-    def step(%Scanner{position: position, direction: :down} = scanner) when position == 0, do: struct(scanner, position: position + 1, direction: :up)
-    def step(%Scanner{position: position, direction: :up} = scanner), do: struct(scanner, position: position + 1)
-    def step(%Scanner{position: position, direction: :down} = scanner), do: struct(scanner, position: position - 1)
-
-    def part2(_input) do
-
+        |> Enum.take(12)
+        # |> Enum.find(fn({_, _, severity}) -> severity == 0 end)
+        # |> elem(1)
     end
 end
