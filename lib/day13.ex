@@ -16,43 +16,43 @@ defmodule Day13 do
         iex> Day13.run([{0, 2}, {1, 2}, {4, 4}, {6, 4}])
         24
 
-        # iex> Day13.run([{0, 2}, {1, 2}, {4, 4}, {6, 4}], 4)
-        # 2
+        iex> Day13.run([{0, 2}, {1, 2}, {4, 4}, {6, 4}], 4)
+        0
     """
     def run(firewall, time_delay \\ 0) do
         firewall
-        |> Enum.filter(fn({depth, range}) -> rem(depth + time_delay, range * 2 - 2) == 0 end)
+        |> Enum.filter(&caught?(&1, time_delay))
         |> Enum.reduce(0, fn({depth, range}, acc) -> acc + depth * range end)
     end
-    
+
+    def caught?({depth, range}, time_delay) do
+      rem(depth + time_delay, (range - 1) * 2) == 0
+    end
+
     def parse_input(input) do
         input
         |> String.trim
         |> String.split("\n")
-        |> Enum.map(fn(s) -> 
-            [depth, range] = s
+        |> Enum.map(fn(s) ->
+            s
             |> String.split(": ")
             |> Enum.map(&String.to_integer/1)
-            {depth, range}
+            |> List.to_tuple
         end)
     end
 
-    # def step(%Scanner{range: range, position: position, direction: :up} = scanner) when position == range - 1, do: struct(scanner, position: position - 1, direction: :down)
-    # def step(%Scanner{position: position, direction: :down} = scanner) when position == 0, do: struct(scanner, position: position + 1, direction: :up)
-    # def step(%Scanner{position: position, direction: :up} = scanner), do: struct(scanner, position: position + 1)
-    # def step(%Scanner{position: position, direction: :down} = scanner), do: struct(scanner, position: position - 1)
-
     def part2(input) do
-        firewall = input
-        |> parse_input
+      input
+      |> parse_input
+      |> foo(0)
+    end
 
-        {firewall, -1, -1}
-        |> Stream.iterate(fn({firewall, time_delay, _}) ->
-            time_delay = time_delay + 1
-            {firewall, time_delay, run(firewall, time_delay)}
-        end)
-        |> Enum.take(12)
-        # |> Enum.find(fn({_, _, severity}) -> severity == 0 end)
-        # |> elem(1)
+    def sneak(firewall, delay) do
+      firewall
+      |> Enum.any?(&caught?(&1, delay))
+      |> case do
+        false -> delay
+        true -> sneak(firewall, delay + 1)
+      end
     end
 end
