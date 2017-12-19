@@ -4,18 +4,22 @@ defmodule Day10 do
         |> String.trim
         |> String.split(",")
         |> Enum.map(&String.to_integer/1)
-        |> hash
+        |> knot
         |> elem(0)
         |> (fn [first, second | _] -> first * second end).()
     end
 
     def part2(input) do
+      hash(input)
+    end
+
+    def hash(input) do
         sequence = input
         |> String.to_charlist
         |> Enum.concat([17, 31, 73, 47, 23])
 
-        Enum.reduce(1..64, {Enum.to_list(0..255), 0, 0}, fn 
-            (_n, {data, position, skip_size}) -> hash(sequence, data, position, skip_size)
+        Enum.reduce(1..64, {Enum.to_list(0..255), 0, 0}, fn
+            (_n, {data, position, skip_size}) -> knot(sequence, data, position, skip_size)
         end)
         |> elem(0)
         |> Enum.chunk(16)
@@ -31,10 +35,10 @@ defmodule Day10 do
     end
 
     @doc """
-        iex> Day10.hash([3,4,1,5], Enum.to_list(0..4))
+        iex> Day10.knot([3,4,1,5], Enum.to_list(0..4))
         {[3, 4, 2, 1, 0], 4, 4}
     """
-    def hash(input, data \\ Enum.to_list(0..255), position \\ 0, skip_size \\ 0) do
+    def knot(input, data \\ Enum.to_list(0..255), position \\ 0, skip_size \\ 0) do
         input
         |> Enum.reduce({data, position, skip_size}, &twist/2)
     end
@@ -58,7 +62,7 @@ defmodule Day10 do
         |> (fn {left, right} -> right ++ left end).() # Correct the sequence
 
         {
-            updated_data, 
+            updated_data,
             rem(position + twist_length + skip_size, data_size),
             skip_size + 1
         }
