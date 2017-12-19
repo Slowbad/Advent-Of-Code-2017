@@ -44,7 +44,7 @@ defmodule Day13 do
     def part2(input) do
       input
       |> parse_input
-      |> foo(0)
+      |> sneak(0)
     end
 
     def sneak(firewall, delay) do
