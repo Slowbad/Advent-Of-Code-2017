@@ -13,6 +13,6 @@ defmodule AdventOfCode2017.Day15Test do
 
     @tag :skip
     test "Part 2 works" do
-        assert -1 == @input |> part2
+        assert 313 == @input |> part2
     end
 end
