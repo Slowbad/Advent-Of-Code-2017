@@ -52,13 +52,13 @@ defmodule Day15 do
       0
   """
   def judge(vala, valb) do
-    case foo(vala) == foo(valb) do
+    case low16(vala) == low16(valb) do
       true -> 1
       false -> 0
     end
   end
 
-  def foo(val), do: val &&& 65535
+  def low16(val), do: val &&& 65535
 
   def part2(input) do
     [starta, startb] = input
