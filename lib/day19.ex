@@ -1,31 +1,41 @@
 defmodule Day19 do
   @doc """
-  #    iex> Day19.part1("     |          \\n     |  +--+    \\n     A  |  C    \\n F---|----E|--+ \\n     |  |  |  D \\n     +B-+  +--+")
+      iex> Day19.part1("     |          \\n     |  +--+    \\n     A  |  C    \\n F---|----E|--+ \\n     |  |  |  D \\n     +B-+  +--+")
       "ABCDEF"
   """
   def part1(input) do
     path = input |> parse_input
 
     path
-    |> walk(find_start(path), :down, [])
+    |> walk(find_start(path))
+    |> elem(0)
     |> Enum.reverse
     |> Enum.join
   end
 
-  def part2(_) do
+  @doc """
+      iex> Day19.part2("     |          \\n     |  +--+    \\n     A  |  C    \\n F---|----E|--+ \\n     |  |  |  D \\n     +B-+  +--+")
+      38
+  """
+  def part2(input) do
+    path = input |> parse_input
+
+    path
+    |> walk(find_start(path))
+    |> elem(1)
   end
 
-  def walk(path, pos, direction, letters) do
+  def walk(path, pos, direction \\ :down, letters \\ [], count \\ 0) do
     case path[pos] do
       nil ->
-        letters
+        {letters, count}
       :line ->
-        walk(path, step(direction, pos), direction, letters)
+        walk(path, step(direction, pos), direction, letters, count + 1)
       :corner ->
         new_dir = turn(path, pos, direction)
-        walk(path, step(new_dir, pos), new_dir, letters)
+        walk(path, step(new_dir, pos), new_dir, letters, count + 1)
       letter ->
-        walk(path, step(direction, pos), direction, [letter | letters])
+        walk(path, step(direction, pos), direction, [letter | letters], count + 1)
     end
   end
 
