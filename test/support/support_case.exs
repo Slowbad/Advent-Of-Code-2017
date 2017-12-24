@@ -9,7 +9,7 @@ defmodule AdventOfCode2017.SupportCase do
 
     def with_puzzle_input(path, fun) do
         case path |> File.read() do
-            {:ok, data} -> fun.(data |> String.trim())
+            {:ok, data} -> fun.(data)
             {:error, _} -> nil
         end
     end
