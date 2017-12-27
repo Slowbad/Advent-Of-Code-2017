@@ -4,7 +4,7 @@ defmodule AdventOfCode2017.Day20Test do
 
     import Day20
 
-    #@tag :skip
+    @tag :skip
     test "Part 1 works" do
       assert with_puzzle_input("test/input/day20.txt", fn input ->
         assert 150 == input |> part1
@@ -14,7 +14,7 @@ defmodule AdventOfCode2017.Day20Test do
     @tag :skip
     test "Part 2 works" do
       assert with_puzzle_input("test/input/day20.txt", fn input ->
-        assert -1 == input |> part2
+        assert 657 == input |> part2
       end)
     end
 end
