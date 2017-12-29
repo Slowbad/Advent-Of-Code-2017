@@ -2,14 +2,19 @@ defmodule Day21 do
   @initial_pattern [[".", "#", "."], [".", ".", "#"], ["#", "#", "#"]]
 
   def part1(input) do
-    enhancements = input |> parse_input
-
-    run(@initial_pattern, enhancements, 5)
-    |> List.flatten
-    |> Enum.count(fn(pixel) -> pixel == "#" end)
+    urg(input, 5)
   end
 
-  def part2(_) do
+  def part2(input) do
+    urg(input, 18)
+  end
+
+  def urg(input, iterations) do
+    enhancements = input |> parse_input
+
+    run(@initial_pattern, enhancements, iterations)
+    |> List.flatten
+    |> Enum.count(fn(pixel) -> pixel == "#" end)
   end
 
   def run(pattern, _enhancements, iter) when iter == 0, do: pattern
@@ -17,11 +22,8 @@ defmodule Day21 do
     block_size = if rem(pattern |> hd |> length, 2) == 0, do: 2, else: 3
 
     pattern
-    |> IO.inspect(label: "before break_grid")
     |> break_grid(block_size)
-    |> IO.inspect(label: "After break_grid")
     |> replace_blocks(enhancements)
-    |> IO.inspect(label: "After replace_blocks")
     |> reassemble_grid(block_size)
     |> run(enhancements, iter - 1)
   end
@@ -31,12 +33,6 @@ defmodule Day21 do
     |> Enum.map(fn(block_set) ->
       Enum.map(block_set, fn(block) -> enhancements[block] end)
     end)
-  end
-
-  def generate_purmutations(block), do: generate_purmutations(block, 4)
-  def generate_purmutations(_block, iter) when iter == 0, do: []
-  def generate_purmutations(block, iter) do
-    [block, flip(block) | block |> rotate |> generate_purmutations(iter - 1)]
   end
 
   def parse_input(input) do
@@ -114,15 +110,15 @@ defmodule Day21 do
   @doc """
       iex> Day21.reassemble_grid([[{["#", ".", ".", "."], [".", "#", ".", "."], [".", ".", "#", "."], [".", ".", ".", "#"]}]], 3)
       [["#", ".", ".", "."], [".", "#", ".", "."], [".", ".", "#", "."], [".", ".", ".", "#"]]
-        """
+  """
   def reassemble_grid([], _block_size), do: []
   def reassemble_grid([block_list | rest], block_size) do
     deconstruct_blocks(block_list, block_size) ++ reassemble_grid(rest, block_size)
   end
 
   @doc """
-  Parameters are ordered to make it easier to understand where they are
-  moving to after the rotation.
+  Parameters are named and ordered to make it easier to understand where they
+  are moving to after the rotation.
 
       iex> Day21.rotate({["#", "."], [".", "#"]})
       {[".", "#"], ["#", "."]}
