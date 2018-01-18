@@ -35,7 +35,7 @@ defmodule AdventOfCode2017.Day06 do
 
         new_state = Map.put(state, max_pos, 0)
         |> redistribute(next_pos(max_pos, state_size) , state_size, block_size)
-        
+
         new_state
     end
 
@@ -75,7 +75,7 @@ defmodule AdventOfCode2017.Day06 do
     end
 
     def next_pos(position, max) when position == max - 1, do: 0
-    def next_pos(position, max), do: position + 1
+    def next_pos(position, _max), do: position + 1
 
     def contains(history, state) do
         Enum.any?(history, fn(s) -> s == state end)
